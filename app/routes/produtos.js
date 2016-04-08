@@ -30,6 +30,9 @@ module.exports = function (app){
 	app.route('/produtos/marcaCount/:marca')
 		.get(controller.CountProdutosMarca);
 
+	app.route('/produtos/filtros/:filtros')
+		.get(controller.filtros);
+
 
 	//app.route('/contatos/:id')
 	//	.get(/*verificaAutenticacao,*/controller.obtemContato)

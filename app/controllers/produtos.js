@@ -3,11 +3,9 @@ var sanitize = require('mongo-sanitize');
 
 module.exports = function (app){
 	var Produtos = app.models.produtos;
-	var controller = {}
-	
+	var controller = {};
 
-
-
+	//Lista todos os produtos
 	controller.listaProdutos = function(req,res){
 		Produtos.find().exec()
 		.then(
@@ -22,6 +20,7 @@ module.exports = function (app){
 	  );
 	};
 
+	//Lista o nome e o hexa da cor
 	controller.listaNomeProdutosCor = function(req,res){
 		console.log(req.params);
 		Produtos.findOne({'cor.nome': req.params.cor},{'cor.nome':1,'cor.hexa':1}).exec()
@@ -37,6 +36,7 @@ module.exports = function (app){
 	  );
 	};
 
+	//Count de produtos de uma determinada cor
 	controller.CountProdutosCor = function(req,res){
 
 		Produtos.count({ 'cor.nome' : req.params.cor }).exec()
@@ -52,9 +52,10 @@ module.exports = function (app){
 	  );
 	};
 
+	//Lista os produtos pela marca 
 	controller.listaNomeProdutosMarca = function(req,res){
 		console.log(req.params);
-		Produtos.findOne({'marca': req.params.marca},{'marca':1}).exec()
+		Produtos.findOne({'marca': req.params.marca}).exec()
 		.then(
 			function(produtos){
 				console.log("ni");
@@ -67,6 +68,7 @@ module.exports = function (app){
 	  );
 	};
 
+	//Count de produtos de uma determinada marca
 	controller.CountProdutosMarca = function(req,res){
 
 		Produtos.count({ 'marca' : req.params.marca }).exec()
@@ -82,7 +84,7 @@ module.exports = function (app){
 	  );
 	};
 
-
+	//Lista produtos por range de cores
 	controller.listaProdutosCor = function(req,res){
 		var cores = req.params.cor.split(";");
 	
@@ -100,26 +102,64 @@ module.exports = function (app){
 			}
 		);	
 	
-	}
+	};
 
+	//Busca produtos por n filtros
+	controller.filtros = function(req,res){
+		var filtros = req.params.filtros.split(";");
+		var cores = filtros[0].split(",");
+		var marcas = filtros[1].split(",");
+		var preco = filtros[2].split(",");
 
-
-	/*controller.listaProdutos = function(req,res){
-		Produtos.find({'cor.nome':'azul'},{'nome':1}).exec()
-		.then(
-			function(produtos){
-				console.log("ni");
-			    res.json(produtos);
-			},
-			function(erro){
-			   console.log(erro);
-			   res.status(500).json(erro);
+		if(preco[1] == 0){
+			preco[0] = 0;
+			preco[1] = 1000000;
 		}
-	  );
-	};*/
 
+		if(marcas[0] == 'todas' && cores[0] == 'todas'){
+			
+			Produtos.find({'preco': { $gte:preco[0], $lte:preco[1]}}).exec()
+			.then(
+				function(produtos){
+					console.log("ni");
+				    res.json(produtos);
+				},
+				function(erro){
+				   console.log(erro);
+				   res.status(500).json(erro);
+				}
+		  	);
+		}else if(marcas[0] != 'todas' && cores[0] == 'todas'){
 
+			Produtos.find({'marca': { $in:marcas} ,'preco': { $gte:preco[0], $lte:preco[1]}}).exec()
+			.then(
+				function(produtos){
+					console.log("ni");
+				    res.json(produtos);
+				},
+				function(erro){
+				   console.log(erro);
+				   res.status(500).json(erro);
+				}
+		  	);
+		}else if(marcas[0] != 'todas' && cores[0] != 'todas'){
 
+			Produtos.find({'marca': { $in:marcas} ,'cor.nome': { $in:cores},'preco': { $gte:preco[0], $lte:preco[1]}}).exec()
+			.then(
+				function(produtos){
+					console.log("ni");
+				    res.json(produtos);
+				},
+				function(erro){
+				   console.log(erro);
+				   res.status(500).json(erro);
+				}
+		  	);
+		}
+
+	};
+
+	// Cria produtos
 	controller.salvaProdutos = function(req,res){
 		var _id = req.body._id;
 
