@@ -4,6 +4,8 @@ module.exports = function(){
 
 	var schema = mongoose.Schema({
 
+	  idProduto : {type: Number},
+
 	  nome :{ type: String },
 
 	  descricao :{ type: String },
@@ -11,6 +13,8 @@ module.exports = function(){
 	  preco : { type: Number },
 
 	  data:{ type: String },
+
+	  foto: { type: String },
 
 	  publicoalvo : { 
 	  		sexo : { type: String },

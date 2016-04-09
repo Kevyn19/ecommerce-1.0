@@ -7,7 +7,38 @@ module.exports = function (app){
 
 	//Lista todos os produtos
 	controller.listaProdutos = function(req,res){
-		Produtos.find().exec()
+		Produtos.find({'estoque' : 1},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1, 'promocao' : 1}).exec()
+		.then(
+			function(produtos){
+				console.log("ni");
+			    res.json(produtos);
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+		}
+	  );
+	};
+
+	//Lista todos os produtos por subgenero
+	controller.listaProdutosBySubcategoria= function(req,res){
+		Produtos.find({'tipoproduto.subcategoria': req.params.subcategoria, 'estoque' : 1},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1, 'promocao' : 1}).exec()
+		.then(
+			function(produtos){
+				console.log("ni");
+			    res.json(produtos);
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+		}
+	  );
+	};
+
+
+	//Lista produtos por id
+	controller.listaProdutosById = function(req,res){
+		Produtos.find({'idProduto': req.params.id, 'estoque' : 1},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1, 'promocao' : 1}).exec()
 		.then(
 			function(produtos){
 				console.log("ni");
@@ -21,9 +52,9 @@ module.exports = function (app){
 	};
 
 	//Lista o nome e o hexa da cor
-	controller.listaNomeProdutosCor = function(req,res){
-		console.log(req.params);
-		Produtos.findOne({'cor.nome': req.params.cor},{'cor.nome':1,'cor.hexa':1}).exec()
+	controller.listaProdutosByCor = function(req,res){
+
+		Produtos.find({'cor.nome': req.params.cor, 'estoque' : 1},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1, 'promocao' : 1}).exec()
 		.then(
 			function(produtos){
 				console.log("ni");
@@ -37,7 +68,7 @@ module.exports = function (app){
 	};
 
 	//Count de produtos de uma determinada cor
-	controller.CountProdutosCor = function(req,res){
+	controller.CountProdutosByCor = function(req,res){
 
 		Produtos.count({ 'cor.nome' : req.params.cor }).exec()
 		.then(
@@ -52,10 +83,26 @@ module.exports = function (app){
 	  );
 	};
 
+	//Listar todas as cores
+	controller.listaDistinctProdutosByCor = function(req,res){
+
+		Produtos.distinct('cor.nome').exec()
+		.then(
+			function(produtos){
+				console.log("ni");
+			    res.json(produtos);
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+		}
+	  );
+	};
+
 	//Lista os produtos pela marca 
-	controller.listaNomeProdutosMarca = function(req,res){
-		console.log(req.params);
-		Produtos.findOne({'marca': req.params.marca}).exec()
+	controller.listaProdutosByMarca = function(req,res){
+
+		Produtos.find({'marca': req.params.marca, 'estoque' : 1},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1, 'promocao' : 1}).exec()
 		.then(
 			function(produtos){
 				console.log("ni");
@@ -69,7 +116,7 @@ module.exports = function (app){
 	};
 
 	//Count de produtos de uma determinada marca
-	controller.CountProdutosMarca = function(req,res){
+	controller.CountProdutosByMarca = function(req,res){
 
 		Produtos.count({ 'marca' : req.params.marca }).exec()
 		.then(
@@ -84,24 +131,118 @@ module.exports = function (app){
 	  );
 	};
 
-	//Lista produtos por range de cores
-	controller.listaProdutosCor = function(req,res){
-		var cores = req.params.cor.split(";");
-	
-			console.log(cores);
-			Produtos.find({'cor.nome': { $in:cores}}).exec()
-			.then(
-				function(produtos){
-					console.log("ni");
-				    res.json(produtos);
-				   
-				},
-				function(erro){
-				   console.log(erro);
-				   res.status(500).json(erro);
-			}
-		);	
-	
+	//Listar todas as marcas
+	controller.listaDistinctProdutosByMarca = function(req,res){
+
+		Produtos.distinct('marca').exec()
+		.then(
+			function(produtos){
+				console.log("ni");
+			    res.json(produtos);
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+		}
+	  );
+	};
+
+	//Lista os produtos pelo sexo 
+	controller.listaProdutosBySexo = function(req,res){
+		console.log(req.params);
+		Produtos.find({'publicoalvo.sexo': req.params.sexo, 'estoque' : 1},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1, 'promocao' : 1}).exec()
+		.then(
+			function(produtos){
+				console.log("ni");
+			    res.json(produtos);
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+		}
+	  );
+	};
+
+	//Count de produtos de um determinado sexo
+	controller.CountProdutosBySexo = function(req,res){
+
+		Produtos.count({ 'publicoalvo.sexo' : req.params.sexo }).exec()
+		.then(
+			function(produtos){
+				console.log("ni");
+			    res.json(produtos);
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+		}
+	  );
+	};
+
+	//Lista os produtos pelo sexo 
+	controller.listaProdutosByFaixaEtaria = function(req,res){
+		console.log(req.params);
+		Produtos.find({'publicoalvo.faixaetaria': req.params.faixaetaria, 'estoque' : 1},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1, 'promocao' : 1}).exec()
+		.then(
+			function(produtos){
+				console.log("ni");
+			    res.json(produtos);
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+		}
+	  );
+	};
+
+
+	//Count de produtos de uma determinada faixa etaria
+	controller.CountProdutosByFaixaEtaria = function(req,res){
+
+		Produtos.count({ 'publicoalvo.faixaetaria' : req.params.faixaetaria }).exec()
+		.then(
+			function(produtos){
+				console.log("ni");
+			    res.json(produtos);
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+		}
+	  );
+	};
+
+	// Listar ordem alfabetica
+	controller.listaProdutosOrdemAlfabetica = function(req,res){
+		Produtos.find({'estoque' : 1},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1, 'promocao' : 1}).sort({'nome': -1}).exec()
+		.then(
+			function(produtos){
+				console.log("ni");
+			    res.json(produtos);
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+		}
+	  );
+
+	};
+
+	// Listar ordem menor/maior preco
+	controller.listaProdutosOrdemPreco = function(req,res){
+
+		Produtos.find({'estoque' : 1},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1, 'promocao' : 1}).sort({'preco': req.params.preco}).exec()
+		.then(
+			function(produtos){
+				console.log("ni");
+			    res.json(produtos);
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+		}
+	  );
+
 	};
 
 	//Busca produtos por n filtros
@@ -118,7 +259,7 @@ module.exports = function (app){
 
 		if(marcas[0] == 'todas' && cores[0] == 'todas'){
 			
-			Produtos.find({'preco': { $gte:preco[0], $lte:preco[1]}}).exec()
+			Produtos.find({'estoque' : 1,'preco': { $gte:preco[0], $lte:preco[1]}}).exec()
 			.then(
 				function(produtos){
 					console.log("ni");
@@ -131,7 +272,7 @@ module.exports = function (app){
 		  	);
 		}else if(marcas[0] != 'todas' && cores[0] == 'todas'){
 
-			Produtos.find({'marca': { $in:marcas} ,'preco': { $gte:preco[0], $lte:preco[1]}}).exec()
+			Produtos.find({'estoque' : 1,'marca': { $in:marcas} ,'preco': { $gte:preco[0], $lte:preco[1]}}).exec()
 			.then(
 				function(produtos){
 					console.log("ni");
@@ -144,7 +285,7 @@ module.exports = function (app){
 		  	);
 		}else if(marcas[0] != 'todas' && cores[0] != 'todas'){
 
-			Produtos.find({'marca': { $in:marcas} ,'cor.nome': { $in:cores},'preco': { $gte:preco[0], $lte:preco[1]}}).exec()
+			Produtos.find({'estoque' : 1,'marca': { $in:marcas} ,'cor.nome': { $in:cores},'preco': { $gte:preco[0], $lte:preco[1]}}).exec()
 			.then(
 				function(produtos){
 					console.log("ni");
@@ -159,80 +300,107 @@ module.exports = function (app){
 
 	};
 
-	// Cria produtos
+	// Cria/alterar produtos 
 	controller.salvaProdutos = function(req,res){
 		var _id = req.body._id;
 
-		var dados = {
+			Produtos.find().sort({'idProduto': -1}).limit(1).exec()
+			.then(
+				function(produtos){
+					console.log(produtos);
+					console.log(produtos.length);
 
-			"nome": req.body.nome,
+					if(produtos.length > 0){
+						console.log('tem');
+						console.log(produtos[0].idProduto);
 
-			"descricao": req.body.descricao,
+						req.body.idProduto = produtos[0].idProduto + 1;
+						
+					}else{
+						console.log('não tem');
+						
+						req.body.idProduto = 1;
+					}
 
-			"preco": req.body.preco,
+					var dados = {
 
-			"data": req.body.data,
+					"idProduto" : req.body.idProduto,
 
-			"publicoalvo": {
-				"sexo" : req.body.publicoalvo.sexo,
-				"faixaetaria" : req.body.publicoalvo.faixaetaria
-			}, 
+					"nome": req.body.nome,
 
-			"tipoproduto" : {
-				"categoria": req.body.tipoproduto.categoria,
-	  			"subcategoria" : req.body.tipoproduto.categoria
-			},
+					"descricao": req.body.descricao,
 
-			"cor" : {
-				"nome" : req.body.cor.nome,
-	  			"hexa" : req.body.cor.hexa
-			},
+					"preco": req.body.preco,
 
-			"bihetePromocao" : {
-				"nome" : req.body.bihetePromocao.nome,
-		   		"ativo" : req.body.bihetePromocao.ativo,
-		   		"porcentagem" : req.body.bihetePromocao.porcentagem
-			},
+					"data": req.body.data,
 
-			"promocao" : {
-		   		"dataIni" : req.body.promocao.dataIni,
-		   		"dataFim" : req.body.promocao.dataFim,
-		   		"porcentagem" : req.body.promocao.porcentagem
-	   		},
+					"foto": req.body.foto,
 
-	   		 "marca" : req.body.marca,
+					"publicoalvo": {
+						"sexo" : req.body.publicoalvo.sexo,
+						"faixaetaria" : req.body.publicoalvo.faixaetaria
+					}, 
 
-	  		 "estoque": req.body.marca
+					"tipoproduto" : {
+						"categoria": req.body.tipoproduto.categoria,
+			  			"subcategoria" : req.body.tipoproduto.categoria
+					},
+
+					"cor" : {
+						"nome" : req.body.cor.nome,
+			  			"hexa" : req.body.cor.hexa
+					},
+
+					"bihetePromocao" : {
+						"nome" : req.body.bihetePromocao.nome,
+				   		"ativo" : req.body.bihetePromocao.ativo,
+				   		"porcentagem" : req.body.bihetePromocao.porcentagem
+					},
+
+					"promocao" : {
+				   		"dataIni" : req.body.promocao.dataIni,
+				   		"dataFim" : req.body.promocao.dataFim,
+				   		"porcentagem" : req.body.promocao.porcentagem
+			   		},
+
+			   		 "marca" : req.body.marca,
+
+			  		 "estoque": req.body.marca
+
+				};
 
 
+				if(_id){
+					Produtos.findByIdAndUpdate(_id, dados).exec().then(
+						function (produtos){
+							res.json(produtos);
+						},
+						function (erro){
+							console.error(erro);
+							res.status(500).json(erro);
+						}
+					);
+				}else {
+					Produtos.create(req.body).then(
+						function(produtos){
+							res.status(201).json(contato)
+							
+						},
+						function(produtos){
+							console.log("erro! "+erro);
+							res.status(500).json(erro)
+						}
+					);
+
+				}
+
+				},
+				function(erro){
+				   console.log(erro);
+				   res.status(500).json(erro);
+			}
+		  );
 		};
-
-		if(_id){
-			Produtos.findByIdAndUpdate(_id, dados).exec().then(
-				function (produtos){
-					res.json(produtos);
-				},
-				function (erro){
-					console.error(erro);
-					res.status(500).json(erro);
-				}
-			);
-		}else {
-			Produtos.create(req.body).then(
-				function(produtos){
-					res.status(201).json(contato)
-					
-				},
-				function(produtos){
-					console.log("erro! "+erro);
-					res.status(500).json(erro)
-				}
-			);
-
-		}
-	};
-
-
 
 	return controller;
 };
