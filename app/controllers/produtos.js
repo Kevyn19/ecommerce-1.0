@@ -5,9 +5,17 @@ module.exports = function (app){
 	var Produtos = app.models.produtos;
 	var controller = {};
 
+	//****************************************************************************************************************************************************************************************************
+	//****************************************************************************************************************************************************************************************************
+	//
+	//		Seviços para produtos - Area de user
+	//
+	//***************************************************************************************************************************************************************************************************
+	//***************************************************************************************************************************************************************************************************
+
 	//Lista todos os produtos
 	controller.listaProdutos = function(req,res){
-		Produtos.find({'estoque' : 1},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1, 'promocao' : 1}).exec()
+		Produtos.find({'estoque' : {$ne: 0}},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1}).exec()
 		.then(
 			function(produtos){
 				console.log("ni");
@@ -20,9 +28,25 @@ module.exports = function (app){
 	  );
 	};
 
+	//Lista os ultimos 8 produtos
+	controller.listaUltimosProdutos = function(req,res){
+		Produtos.find({'estoque' : {$ne: 0}},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1}).sort({'idProduto': -1}).limit(8).exec()
+		.then(
+			function(produtos){
+				console.log("ni");
+			    res.json(produtos);
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+		}
+	  );
+	};
+
+
 	//Lista todos os produtos por subgenero
 	controller.listaProdutosBySubcategoria= function(req,res){
-		Produtos.find({'tipoproduto.subcategoria': req.params.subcategoria, 'estoque' : 1},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1, 'promocao' : 1}).exec()
+		Produtos.find({'menu' : req.params.menuFiltro,'tipoproduto.categoria' : req.params.categoriaFiltro,'tipoproduto.subcategoria': req.params.tipoproduto.subcategoria, 'estoque' : {$ne: 0}},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1}).exec()
 		.then(
 			function(produtos){
 				console.log("ni");
@@ -38,7 +62,7 @@ module.exports = function (app){
 
 	//Lista produtos por id
 	controller.listaProdutosById = function(req,res){
-		Produtos.find({'idProduto': req.params.id, 'estoque' : 1},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1, 'promocao' : 1}).exec()
+		Produtos.find({'idProduto': req.params.id, 'estoque' : {$ne: 0}},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1}).exec()
 		.then(
 			function(produtos){
 				console.log("ni");
@@ -51,10 +75,10 @@ module.exports = function (app){
 	  );
 	};
 
-	//Lista o nome e o hexa da cor
+	//Lista produtos por cor
 	controller.listaProdutosByCor = function(req,res){
 
-		Produtos.find({'cor.nome': req.params.cor, 'estoque' : 1},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1, 'promocao' : 1}).exec()
+		Produtos.find({'cor.nome': req.params.cor, 'estoque' : {$ne: 0}},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1}).exec()
 		.then(
 			function(produtos){
 				console.log("ni");
@@ -70,7 +94,7 @@ module.exports = function (app){
 	//Count de produtos de uma determinada cor
 	controller.CountProdutosByCor = function(req,res){
 
-		Produtos.count({ 'cor.nome' : req.params.cor }).exec()
+		Produtos.count({'menu': req.params.menu, 'tipoproduto.categoria' : req.params.categoria, 'tipoproduto.subcategoria' : req.params.subcategoria, 'cor.nome' : req.params.cor, 'estoque' : {$ne: 0} }).exec()
 		.then(
 			function(produtos){
 				console.log("ni");
@@ -86,7 +110,7 @@ module.exports = function (app){
 	//Listar todas as cores
 	controller.listaDistinctProdutosByCor = function(req,res){
 
-		Produtos.distinct('cor.nome').exec()
+		Produtos.distinct('cor.nome', {'menu': req.params.menu, 'tipoproduto.categoria' : req.params.categoria, 'tipoproduto.subcategoria' : req.params.subcategoria, 'estoque' : {$ne: 0}}).exec()
 		.then(
 			function(produtos){
 				console.log("ni");
@@ -102,7 +126,7 @@ module.exports = function (app){
 	//Lista os produtos pela marca 
 	controller.listaProdutosByMarca = function(req,res){
 
-		Produtos.find({'marca': req.params.marca, 'estoque' : 1},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1, 'promocao' : 1}).exec()
+		Produtos.find({'marca': req.params.marca, 'estoque' : {$ne: 0}},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1}).exec()
 		.then(
 			function(produtos){
 				console.log("ni");
@@ -118,7 +142,7 @@ module.exports = function (app){
 	//Count de produtos de uma determinada marca
 	controller.CountProdutosByMarca = function(req,res){
 
-		Produtos.count({ 'marca' : req.params.marca }).exec()
+		Produtos.count({'menu': req.params.menu, 'tipoproduto.categoria' : req.params.categoria, 'tipoproduto.subcategoria' : req.params.subcategoria, 'marca' : req.params.marca, 'estoque' : {$ne: 0}}).exec()
 		.then(
 			function(produtos){
 				console.log("ni");
@@ -134,72 +158,7 @@ module.exports = function (app){
 	//Listar todas as marcas
 	controller.listaDistinctProdutosByMarca = function(req,res){
 
-		Produtos.distinct('marca').exec()
-		.then(
-			function(produtos){
-				console.log("ni");
-			    res.json(produtos);
-			},
-			function(erro){
-			   console.log(erro);
-			   res.status(500).json(erro);
-		}
-	  );
-	};
-
-	//Lista os produtos pelo sexo 
-	controller.listaProdutosBySexo = function(req,res){
-		console.log(req.params);
-		Produtos.find({'publicoalvo.sexo': req.params.sexo, 'estoque' : 1},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1, 'promocao' : 1}).exec()
-		.then(
-			function(produtos){
-				console.log("ni");
-			    res.json(produtos);
-			},
-			function(erro){
-			   console.log(erro);
-			   res.status(500).json(erro);
-		}
-	  );
-	};
-
-	//Count de produtos de um determinado sexo
-	controller.CountProdutosBySexo = function(req,res){
-
-		Produtos.count({ 'publicoalvo.sexo' : req.params.sexo }).exec()
-		.then(
-			function(produtos){
-				console.log("ni");
-			    res.json(produtos);
-			},
-			function(erro){
-			   console.log(erro);
-			   res.status(500).json(erro);
-		}
-	  );
-	};
-
-	//Lista os produtos pelo sexo 
-	controller.listaProdutosByFaixaEtaria = function(req,res){
-		console.log(req.params);
-		Produtos.find({'publicoalvo.faixaetaria': req.params.faixaetaria, 'estoque' : 1},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1, 'promocao' : 1}).exec()
-		.then(
-			function(produtos){
-				console.log("ni");
-			    res.json(produtos);
-			},
-			function(erro){
-			   console.log(erro);
-			   res.status(500).json(erro);
-		}
-	  );
-	};
-
-
-	//Count de produtos de uma determinada faixa etaria
-	controller.CountProdutosByFaixaEtaria = function(req,res){
-
-		Produtos.count({ 'publicoalvo.faixaetaria' : req.params.faixaetaria }).exec()
+		Produtos.distinct('marca', {'menu': req.params.menu, 'tipoproduto.categoria' : req.params.categoria, 'tipoproduto.subcategoria' : req.params.subcategoria, 'estoque' : {$ne: 0}}).exec()
 		.then(
 			function(produtos){
 				console.log("ni");
@@ -214,7 +173,7 @@ module.exports = function (app){
 
 	// Listar ordem alfabetica
 	controller.listaProdutosOrdemAlfabetica = function(req,res){
-		Produtos.find({'estoque' : 1},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1, 'promocao' : 1}).sort({'nome': -1}).exec()
+		Produtos.find({'estoque' : {$ne: 0}},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1}).sort({'nome': -1}).exec()
 		.then(
 			function(produtos){
 				console.log("ni");
@@ -231,7 +190,7 @@ module.exports = function (app){
 	// Listar ordem menor/maior preco
 	controller.listaProdutosOrdemPreco = function(req,res){
 
-		Produtos.find({'estoque' : 1},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1, 'promocao' : 1}).sort({'preco': req.params.preco}).exec()
+		Produtos.find({'estoque' : {$ne: 0}},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1}).sort({'preco': req.params.preco}).exec()
 		.then(
 			function(produtos){
 				console.log("ni");
@@ -245,47 +204,155 @@ module.exports = function (app){
 
 	};
 
+	//Lista produtos relacionados
+	controller.listaProdutosRelacionados = function(req,res){
+
+		Produtos.find({'estoque' : {$ne: 0},'menu': req.params.menu, 'tipoproduto.categoria' : req.params.categoria, 'tipoproduto.subcategoria' : req.params.subcategoria}).sort({'idProduto': -1}).limit(6).exec()
+		.then(
+			function(produtos){
+				console.log("ni");
+			    res.json(produtos);
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+		}
+	  );
+
+	};
+
+
+	//Count de produtos de uma determinada categoria
+	controller.CountProdutosByCategoria = function(req,res){
+
+		Produtos.count({'menu': req.params.menu, 'tipoproduto.categoria' : req.params.categoria, 'estoque' : {$ne: 0}}).exec()
+		.then(
+			function(produtos){
+				console.log("ni");
+			    res.json(produtos);
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+		}
+	  );
+	};
+
+
 	//Busca produtos por n filtros
 	controller.filtros = function(req,res){
+
+
 		var filtros = req.params.filtros.split(";");
+
 		var cores = filtros[0].split(",");
 		var marcas = filtros[1].split(",");
 		var preco = filtros[2].split(",");
 
+		var menu = filtros[3];
+		var categoria = filtros[4];
+		var subcategoria = filtros[5];
+
+		var ordem = filtros[6].split(",");
+		var pagina = filtros[7].split(",");
+
+
 		if(preco[1] == 0){
 			preco[0] = 0;
-			preco[1] = 1000000;
+			preco[1] = 1000000000;
 		}
 
-		if(marcas[0] == 'todas' && cores[0] == 'todas'){
+		if(ordem[0] == 'nome'){
+
+			if(marcas[0] == 'todas' && cores[0] == 'todas'){
+
+				
+				Produtos.find({loja: req.params.loja,'menu' : menu,'tipoproduto.categoria' : categoria,'tipoproduto.subcategoria': subcategoria, 'estoque' : {$ne: 0}, 'preco': { $gte:preco[0], $lte:preco[1]}}).limit(pagina[1]*1).skip((pagina[0] * pagina[1]) - pagina[1]).sort({'preco': ordem[1]}).exec()
+				.then(
+					function(produtos){
+						console.log("ni");
+					    res.json(produtos);
+					},
+					function(erro){
+					   console.log(erro);
+					   res.status(500).json(erro);
+					}
+			  	);
+			}else if(marcas[0] != 'todas' && cores[0] == 'todas'){
+
+				Produtos.find({loja: req.params.loja,'menu' : menu,'tipoproduto.categoria' : categoria,'tipoproduto.subcategoria': subcategoria, 'estoque' : {$ne: 0},'marca': { $in:marcas} ,'preco': { $gte:preco[0], $lte:preco[1]}}).limit(pagina[1]*1).skip((pagina[0] * pagina[1]) - pagina[1]).sort({'preco': ordem[1]}).exec()
+				.then(
+					function(produtos){
+						console.log("ni");
+					    res.json(produtos);
+					},
+					function(erro){
+					   console.log(erro);
+					   res.status(500).json(erro);
+					}
+			  	);
+			}else if(marcas[0] != 'todas' && cores[0] != 'todas'){
+
+				Produtos.find({loja: req.params.loja, 'menu' : menu,'tipoproduto.categoria' : categoria,'tipoproduto.subcategoria': subcategoria, 'estoque' : {$ne: 0},'marca': { $in:marcas} ,'cor.nome': { $in:cores},'preco': { $gte:preco[0], $lte:preco[1]}}).limit(pagina[1]*1).skip((pagina[0] * pagina[1]) - pagina[1]).sort({'preco': ordem[1]}).exec()
+				.then(
+					function(produtos){
+						console.log("ni");
+					    res.json(produtos);
+					},
+					function(erro){
+					   console.log(erro);
+					   res.status(500).json(erro);
+					}
+			  	);
+			}
+
+		}else if(ordem[0] == 'preco'){
+
+			if(marcas[0] == 'todas' && cores[0] == 'todas'){
 			
-			Produtos.find({'estoque' : 1,'preco': { $gte:preco[0], $lte:preco[1]}}).exec()
-			.then(
-				function(produtos){
-					console.log("ni");
-				    res.json(produtos);
-				},
-				function(erro){
-				   console.log(erro);
-				   res.status(500).json(erro);
-				}
-		  	);
-		}else if(marcas[0] != 'todas' && cores[0] == 'todas'){
+				Produtos.find({loja: req.params.loja, 'menu' : menu,'tipoproduto.categoria' : categoria,'tipoproduto.subcategoria': subcategoria, 'estoque' : {$ne: 0},'preco': { $gte:preco[0], $lte:preco[1]}}).limit(pagina[1]*1).skip((pagina[0] * pagina[1]) - pagina[1]).sort({'preco': ordem[1]}).exec()
+				.then(
+					function(produtos){
+						console.log("ni");
+					    res.json(produtos);
+					},
+					function(erro){
+					   console.log(erro);
+					   res.status(500).json(erro);
+					}
+			  	);
+			}else if(marcas[0] != 'todas' && cores[0] == 'todas'){
 
-			Produtos.find({'estoque' : 1,'marca': { $in:marcas} ,'preco': { $gte:preco[0], $lte:preco[1]}}).exec()
-			.then(
-				function(produtos){
-					console.log("ni");
-				    res.json(produtos);
-				},
-				function(erro){
-				   console.log(erro);
-				   res.status(500).json(erro);
-				}
-		  	);
-		}else if(marcas[0] != 'todas' && cores[0] != 'todas'){
+				Produtos.find({loja: req.params.loja, 'menu' : menu,'tipoproduto.categoria' : categoria,'tipoproduto.subcategoria': subcategoria, 'estoque' : {$ne: 0},'marca': { $in:marcas} ,'preco': { $gte:preco[0], $lte:preco[1]}}).limit(pagina[1]*1).skip((pagina[0] * pagina[1]) - pagina[1]).sort({'preco': ordem[1]}).exec()
+				.then(
+					function(produtos){
+						console.log("ni");
+					    res.json(produtos);
+					},
+					function(erro){
+					   console.log(erro);
+					   res.status(500).json(erro);
+					}
+			  	);
+			}else if(marcas[0] != 'todas' && cores[0] != 'todas'){
+	
 
-			Produtos.find({'estoque' : 1,'marca': { $in:marcas} ,'cor.nome': { $in:cores},'preco': { $gte:preco[0], $lte:preco[1]}}).exec()
+				Produtos.find({loja: req.params.loja, 'menu' : menu,'tipoproduto.categoria' : categoria,'tipoproduto.subcategoria': subcategoria,'estoque' : {$ne: 0},'marca': { $in:marcas},'cor.nome': { $in:cores},'preco': { $gte:preco[0], $lte:preco[1]}}).limit(pagina[1]*1).skip((pagina[0] * pagina[1]) - pagina[1]).sort({'preco': ordem[1]}).exec()
+				.then(
+					function(produtos){
+						console.log("ni");
+					    res.json(produtos);
+					},
+					function(erro){
+					   console.log(erro);
+					   res.status(500).json(erro);
+					}
+			  	);
+			}
+
+		}else if(ordem[0] == 'like'){
+			console.log('tetao');
+			Produtos.find({loja: req.params.loja, 'nome': { $regex: req.params.nome },'estoque' : {$ne: 0},'preco': { $gte:preco[0], $lte:preco[1]}}).limit(pagina[1]*1).skip((pagina[0] * pagina[1]) - pagina[1]).exec()
 			.then(
 				function(produtos){
 					console.log("ni");
@@ -296,31 +363,188 @@ module.exports = function (app){
 				   res.status(500).json(erro);
 				}
 		  	);
+
 		}
 
 	};
 
-	// Cria/alterar produtos 
-	controller.salvaProdutos = function(req,res){
-		var _id = req.body._id;
 
-			Produtos.find().sort({'idProduto': -1}).limit(1).exec()
+	//Count de produtos por n filtros
+	controller.CountProdutosFiltros = function(req,res){
+		
+		var filtros = req.params.filtros.split(";");
+
+		var cores = filtros[0].split(",");
+		var marcas = filtros[1].split(",");
+		var preco = filtros[2].split(",");
+
+		var menu = filtros[3];
+		var categoria = filtros[4];
+		var subcategoria = filtros[5];
+
+		var ordem = filtros[6].split(",");
+		var pagina = filtros[7].split(",");
+
+
+		if(preco[1] == 0){
+			preco[0] = 0;
+			preco[1] = 1000000000;
+		}
+
+
+		if(ordem[0] == 'nome'){
+
+			if(marcas[0] == 'todas' && cores[0] == 'todas'){
+				
+				Produtos.count({loja: req.params.loja, 'menu' : menu,'tipoproduto.categoria' : categoria,'tipoproduto.subcategoria': subcategoria, 'estoque' : {$ne: 0}, 'preco': { $gte:preco[0], $lte:preco[1]}}).exec()
+				.then(
+					function(produtos){
+						console.log("ni");
+					    res.json(produtos);
+					},
+					function(erro){
+					   console.log(erro);
+					   res.status(500).json(erro);
+					}
+			  	);
+			}else if(marcas[0] != 'todas' && cores[0] == 'todas'){
+
+				Produtos.count({loja: req.params.loja, 'menu' : menu,'tipoproduto.categoria' : categoria,'tipoproduto.subcategoria': subcategoria, 'estoque' : {$ne: 0},'marca': { $in:marcas} ,'preco': { $gte:preco[0], $lte:preco[1]}}).exec()
+				.then(
+					function(produtos){
+						console.log("ni");
+					    res.json(produtos);
+					},
+					function(erro){
+					   console.log(erro);
+					   res.status(500).json(erro);
+					}
+			  	);
+			}else if(marcas[0] != 'todas' && cores[0] != 'todas'){
+
+				Produtos.count({loja: req.params.loja, 'menu' : menu,'tipoproduto.categoria' : categoria,'tipoproduto.subcategoria': subcategoria, 'estoque' : {$ne: 0},'marca': { $in:marcas} ,'cor.nome': { $in:cores},'preco': { $gte:preco[0], $lte:preco[1]}}).exec()
+				.then(
+					function(produtos){
+						console.log("ni");
+					    res.json(produtos);
+					},
+					function(erro){
+					   console.log(erro);
+					   res.status(500).json(erro);
+					}
+			  	);
+			}
+
+		}else if(ordem[0] == 'preco'){
+
+			if(marcas[0] == 'todas' && cores[0] == 'todas'){
+			
+				Produtos.count({loja: req.params.loja, 'menu' : menu,'tipoproduto.categoria' : categoria,'tipoproduto.subcategoria': subcategoria, 'estoque' : {$ne: 0},'preco': { $gte:preco[0], $lte:preco[1]}}).exec()
+				.then(
+					function(produtos){
+						console.log("ni");
+					    res.json(produtos);
+					},
+					function(erro){
+					   console.log(erro);
+					   res.status(500).json(erro);
+					}
+			  	);
+			}else if(marcas[0] != 'todas' && cores[0] == 'todas'){
+
+				Produtos.count({loja: req.params.loja, 'menu' : menu,'tipoproduto.categoria' : categoria,'tipoproduto.subcategoria': subcategoria, 'estoque' : {$ne: 0},'marca': { $in:marcas} ,'preco': { $gte:preco[0], $lte:preco[1]}}).exec()
+				.then(
+					function(produtos){
+						console.log("ni");
+					    res.json(produtos);
+					},
+					function(erro){
+					   console.log(erro);
+					   res.status(500).json(erro);
+					}
+			  	);
+			}else if(marcas[0] != 'todas' && cores[0] != 'todas'){
+
+				Produtos.count({loja: req.params.loja, 'menu' : menu,'tipoproduto.categoria' : categoria,'tipoproduto.subcategoria': subcategoria, 'estoque' : {$ne: 0},'marca': { $in:marcas} ,'cor.nome': { $in:cores},'preco': { $gte:preco[0], $lte:preco[1]}}).exec()
+				.then(
+					function(produtos){
+						console.log("ni");
+					    res.json(produtos);
+					},
+					function(erro){
+					   console.log(erro);
+					   res.status(500).json(erro);
+					}
+			  	);
+			}
+
+		}else if(ordem[0] == 'like'){
+			Produtos.count({loja: req.params.loja, 'nome': { $regex: req.params.nome },'estoque' : {$ne: 0},'preco': { $gte:preco[0], $lte:preco[1]}}).exec()
+			.then(
+				function(produtos){
+					console.log("ni");
+				    res.json(produtos);
+				},
+				function(erro){
+				   console.log(erro);
+				   res.status(500).json(erro);
+				}
+		  	);
+
+		}
+
+
+	}
+
+
+
+//****************************************************************************************************************************************************************************************************
+//****************************************************************************************************************************************************************************************************
+//
+//		Seviços para produtos - Area de Admin
+//
+//****************************************************************************************************************************************************************************************************
+//****************************************************************************************************************************************************************************************************
+
+	// Cria/alterar produtos 
+		controller.salvaProdutos = function(req,res){
+			var _id = req.body._id;
+
+			Produtos.find({'nome' : {$ne: null}}).sort({'idProduto': -1}).limit(1).exec()
 			.then(
 				function(produtos){
 					console.log(produtos);
 					console.log(produtos.length);
 
 					if(produtos.length > 0){
-						console.log('tem');
-						console.log(produtos[0].idProduto);
 
 						req.body.idProduto = produtos[0].idProduto + 1;
 						
 					}else{
-						console.log('não tem');
 						
 						req.body.idProduto = 1;
+
 					}
+
+					Produtos.find({'menu' : req.body.menu,'tipoproduto.categoria' : req.body.tipoproduto.categoria, 'tipoproduto.subcategoria': req.body.tipoproduto.subcategoria }).exec()
+						.then(
+							function(produtos){
+								if(produtos[0].nome == '' || produtos[0].nome == "" || produtos[0].nome == null){
+									Produtos.remove({"_id":produtos[0]._id}).exec()
+									.then(
+										function(){
+											
+										},function(erro){
+											return console.error(erro);
+										}
+									);
+								}
+							},
+							function(erro){
+							   console.log(erro);
+							   res.status(500).json(erro);
+							}
+						 );
 
 					var dados = {
 
@@ -336,14 +560,13 @@ module.exports = function (app){
 
 					"foto": req.body.foto,
 
-					"publicoalvo": {
-						"sexo" : req.body.publicoalvo.sexo,
-						"faixaetaria" : req.body.publicoalvo.faixaetaria
-					}, 
+					"menu" : req.body.menu,
+
+					"loja" :  req.body.loja,
 
 					"tipoproduto" : {
 						"categoria": req.body.tipoproduto.categoria,
-			  			"subcategoria" : req.body.tipoproduto.categoria
+			  			"subcategoria" : req.body.tipoproduto.subcategoria
 					},
 
 					"cor" : {
@@ -351,36 +574,54 @@ module.exports = function (app){
 			  			"hexa" : req.body.cor.hexa
 					},
 
-					"bihetePromocao" : {
-						"nome" : req.body.bihetePromocao.nome,
-				   		"ativo" : req.body.bihetePromocao.ativo,
-				   		"porcentagem" : req.body.bihetePromocao.porcentagem
-					},
-
 					"promocao" : {
-				   		"dataIni" : req.body.promocao.dataIni,
-				   		"dataFim" : req.body.promocao.dataFim,
-				   		"porcentagem" : req.body.promocao.porcentagem
+				   		"nome" : req.body.promocao.nome,
+	   					"tipo" : req.body.promocao.tipo
 			   		},
 
 			   		 "marca" : req.body.marca,
 
-			  		 "estoque": req.body.marca
+			  		 "estoque": req.body.estoque
 
 				};
 
+				 				Produtos.create(dados).then(
+					function(produtos){
+						
+						res.status(201).json(contato)
+						
+					},
+					function(produtos){
+						console.log("erro! "+erro);
+						res.status(500).json(erro)
+					}
+				);
 
-				if(_id){
-					Produtos.findByIdAndUpdate(_id, dados).exec().then(
-						function (produtos){
-							res.json(produtos);
-						},
-						function (erro){
-							console.error(erro);
-							res.status(500).json(erro);
-						}
-					);
-				}else {
+				},
+				function(erro){
+				   console.log(erro);
+				   res.status(500).json(erro);
+			}
+		 );
+		};
+
+	// Cria/alterar Menu 
+	controller.salvaMenuProdutos = function(req,res){
+
+		Produtos.find({'menu' : req.body.menu},{'idProduto' : 1}).exec()
+		.then(
+			function(produtos){
+				if(produtos.length > 0){
+					
+				}else{
+
+					var dados = {
+						"menu" : req.body.menu,
+
+						"loja" : req.body.loja
+
+					};
+
 					Produtos.create(req.body).then(
 						function(produtos){
 							res.status(201).json(contato)
@@ -393,14 +634,258 @@ module.exports = function (app){
 					);
 
 				}
-
-				},
-				function(erro){
-				   console.log(erro);
-				   res.status(500).json(erro);
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
 			}
-		  );
-		};
+	  );
+
+	};
+
+	//Listar todos os menus
+	controller.listaDistinctProdutosByMenu = function(req,res){
+
+		Produtos.distinct('menu',{loja: req.params.loja}).exec()
+		.then(
+			function(produtos){
+				console.log("ni");
+			    res.json(produtos);
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+		}
+	  );
+	};
+
+	//Altera o valor do menu nos produtos
+	controller.updateProdutosByMenu = function(req,res){
+
+		Produtos.update({'menu' : req.body.menu, 'loja' : req.body.loja},{ $set: { 'menu': req.body.menuNovo }}, {multi: true}).exec()
+		.then(
+			function(produtos){
+				console.log("ni");
+			    res.json(produtos);
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+		}
+	  );	
+	};
+
+
+	// Cria/alterar Categoria 
+	controller.salvaCategoriaProdutos = function(req,res){
+		var _id = req.body._id;
+
+		Produtos.find({'menu' : req.body.menu, 'tipoproduto.categoria' : req.body.tipoproduto.categoria },{'idProduto' : 1}).exec()
+		.then(
+			function(produtos){
+
+				if(produtos.length > 0){
+					
+				}else{
+
+					Produtos.find({'menu' : req.body.menu}).exec()
+					.then(
+						function(produtos){
+							console.log(produtos);
+							console.log(produtos[0].tipoproduto.categoria);
+							if(produtos[0].tipoproduto.categoria == '' || produtos[0].tipoproduto.categoria == "" || produtos[0].tipoproduto.categoria == null){
+								Produtos.remove({"_id":produtos[0]._id}).exec()
+								.then(
+									function(){
+										
+									},function(erro){
+										return console.error(erro);
+									}
+								);
+							}
+						},
+						function(erro){
+						   console.log(erro);
+						   res.status(500).json(erro);
+						}
+					  );
+
+
+					var dados = {
+						"menu" : req.body.menu,
+
+						"tipoproduto" : {
+							"categoria": req.body.tipoproduto.categoria,
+					  		"subcategoria" : req.body.tipoproduto.subcategoria
+						}
+
+					};
+
+					Produtos.create(dados).then(
+						function(produtos){
+							res.status(201).json(contato);
+							
+						},
+						function(produtos){
+							console.log("erro! "+erro);
+							res.status(500).json(erro)
+						}
+					);
+					
+				}
+
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+			}
+	  	);
+
+	};
+
+
+	//Listar todas as categorias
+	controller.listaDistinctProdutosByCategoria = function(req,res){
+		Produtos.distinct('tipoproduto.categoria',{'menu' : req.params.menuFiltro, loja: req.params.loja} ).exec()
+		.then(
+			function(produtos){
+				console.log("ni");
+			    res.json(produtos);
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+		}
+	  );
+	};
+
+	//Altera o valor da categoria nos produtos
+	controller.updateProdutosByCategoria = function(req,res){
+		console.log(req.body.tipoproduto.categoria);
+		console.log();
+
+		Produtos.update({'tipoproduto.categoria' : req.body.tipoproduto.categoria, 'loja' : req.body.loja},{ $set: { 'tipoproduto.categoria': req.body.tipoproduto.categoriaNovo }}, {multi: true}).exec()
+		.then(
+			function(produtos){
+				console.log("ni");
+			    res.json(produtos);
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+		}
+	  );	
+	};
+
+
+	//Cria/alterar Subcategoria 
+	controller.salvaSubCategoriaProdutos = function(req,res){
+		var _id = req.body._id;
+
+		Produtos.find({'menu' : req.body.menu, 'tipoproduto.categoria' : req.body.tipoproduto.categoria, 'tipoproduto.subcategoria' : req.body.tipoproduto.subcategoria },{'idProduto' : 1}).exec()
+		.then(
+			function(produtos){
+				console.log('teste '+ produtos);
+
+				if(produtos.length > 0){
+					
+				}else{
+
+					Produtos.find({'menu' : req.body.menu,'tipoproduto.categoria' : req.body.tipoproduto.categoria }).exec()
+					.then(
+						function(produtos){
+							if(produtos[0].tipoproduto.subcategoria == '' || produtos[0].tipoproduto.subcategoria == "" || produtos[0].tipoproduto.subcategoria == null){
+								Produtos.remove({"_id":produtos[0]._id}).exec()
+								.then(
+									function(){
+										
+									},function(erro){
+										return console.error(erro);
+									}
+								);
+							}
+						},
+						function(erro){
+						   console.log(erro);
+						   res.status(500).json(erro);
+						}
+					  );
+
+					var dados = {
+						"menu" : req.body.menu,
+
+						"tipoproduto" : {
+							"categoria": req.body.tipoproduto.categoria,
+					  		"subcategoria" : req.body.tipoproduto.subcategoria
+						}
+
+					};
+					
+					Produtos.create(dados).then(
+						function(produtos){
+							res.status(201).json(contato)
+							
+						},
+						function(produtos){
+							console.log("erro! "+erro);
+							res.status(500).json(erro)
+						}
+					);
+					
+				}
+
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+			}
+	  	);
+
+	};
+
+
+	//Listar todas as subcategoria
+	controller.listaDistinctProdutosBySubcategoria = function(req,res){
+
+		Produtos.distinct('tipoproduto.subcategoria',{'menu' : req.params.menuFiltro,'tipoproduto.categoria' : req.params.categoriaFiltro, loja: req.params.loja}).exec()
+		.then(
+			function(produtos){
+				console.log("ni");
+			    res.json(produtos);
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+		}
+	  );
+	};
+
+		//Altera o valor da categoria nos produtos
+	controller.updateProdutosBySubcategoria = function(req,res){
+		console.log(req.body.tipoproduto.categoria);
+		console.log();
+
+		Produtos.update({'tipoproduto.subcategoria' : req.body.tipoproduto.subcategoria , 'loja': req.body.loja},{ $set: { 'tipoproduto.subcategoria': req.body.tipoproduto.subcategoriaNovo }}, {multi: true}).exec()
+		.then(
+			function(produtos){
+				console.log("ni");
+			    res.json(produtos);
+			},
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+		}
+	  );	
+	};
 
 	return controller;
 };
+
+
+	//****************************************************************************************************************************************************************************************************
+	//****************************************************************************************************************************************************************************************************
+	//
+	//		Seviços para produtos - Commun
+	//
+	//***************************************************************************************************************************************************************************************************
+	//***************************************************************************************************************************************************************************************************

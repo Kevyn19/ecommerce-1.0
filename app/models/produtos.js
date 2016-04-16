@@ -16,10 +16,9 @@ module.exports = function(){
 
 	  foto: { type: String },
 
-	  publicoalvo : { 
-	  		sexo : { type: String },
-	  		faixaetaria: { type: String }
-	  },
+	  menu: { type: String },
+
+	  loja: { type: String },
 
 	  tipoproduto : { 
 	  		categoria:{ type: String },
@@ -31,18 +30,9 @@ module.exports = function(){
 	  		hexa : { type: String }
 	   },
 
-	   bihetePromocao : {
-	   		nome : { type: String },
-	   		ativo : { type: Number },
-	   		porcentagem : { type: Number }
-
-	   },
-
 	   promocao : {
-	   		dataIni : { type: String },
-	   		dataFim : { type: String },
-	   		porcentagem : { type: Number }
-
+	   		nome : { type: String },
+	   		tipo : { type: String }
 	   },
 
 
