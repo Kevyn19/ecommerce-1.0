@@ -1,5 +1,6 @@
 
 var sanitize = require('mongo-sanitize');
+var Correios = require('node-correios');
 
 module.exports = function (app){
 	var Produtos = app.models.produtos;
@@ -62,7 +63,7 @@ module.exports = function (app){
 
 	//Lista produtos por id
 	controller.listaProdutosById = function(req,res){
-		Produtos.find({'idProduto': req.params.id, 'estoque' : {$ne: 0}},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1}).exec()
+		Produtos.find({'idProduto': req.params.id, 'estoque' : {$ne: 0}},{'idProduto' : 1, 'nome' : 1,'preco' : 1, 'foto' : 1, 'loja' : 1, 'cep': 1}).exec()
 		.then(
 			function(produtos){
 				console.log("ni");
@@ -245,6 +246,8 @@ module.exports = function (app){
 
 		var filtros = req.params.filtros.split(";");
 
+		console.log(filtros);
+
 		var cores = filtros[0].split(",");
 		var marcas = filtros[1].split(",");
 		var preco = filtros[2].split(",");
@@ -270,7 +273,7 @@ module.exports = function (app){
 				Produtos.find({loja: req.params.loja,'menu' : menu,'tipoproduto.categoria' : categoria,'tipoproduto.subcategoria': subcategoria, 'estoque' : {$ne: 0}, 'preco': { $gte:preco[0], $lte:preco[1]}}).limit(pagina[1]*1).skip((pagina[0] * pagina[1]) - pagina[1]).sort({'preco': ordem[1]}).exec()
 				.then(
 					function(produtos){
-						console.log("ni");
+						console.log("aqui");
 					    res.json(produtos);
 					},
 					function(erro){
@@ -497,6 +500,54 @@ module.exports = function (app){
 	}
 
 
+	//Calcula frete e prazo de entrega
+	controller.calculaFrete = function(req,res){
+		 correios = new Correios();
+
+		 idProduto = req.body.idProduto;
+
+		 Produtos.find({'idProduto' : idProduto}).exec()
+		.then(
+			function(produtos){
+				console.log(produtos[0].comprimento);
+
+				var args = {
+				"nCdServico" : '40010,41106,40215,40290,40045 ',
+				"sCepOrigem" : produtos[0].cep,
+				"sCepDestino" : req.body.CepDestino,
+				"nVlPeso" :  produtos[0].peso,
+				"nCdFormato" : produtos[0].formato,
+				"nVlComprimento" : produtos[0].comprimento,
+				"nVlAltura": produtos[0].altura,
+				"nVlLargura" : produtos[0].largura,
+				"nVlDiametro" : produtos[0].diametro,
+				"nVlValorDeclarado": produtos[0].valorDeclarado
+				}
+		 
+			 	console.log(args);
+				correios.calcPrecoPrazo(args, function (err, result) {
+				  
+
+				  if(produtos[0].promocao.tipo == "Frete Gratis"){
+				  	for (var i = 0; i < result.length; i++) {
+				  		result[i].Valor = 0;
+				  	}
+
+				  }
+				  console.log(result);
+				  res.json(result);
+				});
+			},
+
+			function(erro){
+			   console.log(erro);
+			   res.status(500).json(erro);
+		}
+	  );
+
+	};
+
+
 
 //****************************************************************************************************************************************************************************************************
 //****************************************************************************************************************************************************************************************************
@@ -562,7 +613,23 @@ module.exports = function (app){
 
 					"menu" : req.body.menu,
 
-					"loja" :  req.body.loja,
+					"loja" : req.body.loja,
+
+	 		  		"cep" : req.body.cep,
+
+	 		  		"peso": req.body.peso,
+
+				    "formato" : req.body.formato,
+
+				    "comprimento" : req.body.comprimento,
+
+				    "altura" : req.body.altura,
+
+				    "largura" : req.body.largura,
+
+				    "diametro" : req.body.diametro, 
+
+				    "valorDeclarado" : req.body.valorDeclarado, 
 
 					"tipoproduto" : {
 						"categoria": req.body.tipoproduto.categoria,
@@ -585,10 +652,10 @@ module.exports = function (app){
 
 				};
 
-				 				Produtos.create(dados).then(
+				 Produtos.create(dados).then(
 					function(produtos){
 						
-						res.status(201).json(contato)
+						res.status(201).json(produtos)
 						
 					},
 					function(produtos){
@@ -624,7 +691,7 @@ module.exports = function (app){
 
 					Produtos.create(req.body).then(
 						function(produtos){
-							res.status(201).json(contato)
+							res.status(201).json(produtos)
 							
 						},
 						function(produtos){
@@ -723,7 +790,7 @@ module.exports = function (app){
 
 					Produtos.create(dados).then(
 						function(produtos){
-							res.status(201).json(contato);
+							res.status(201).json(produtos);
 							
 						},
 						function(produtos){
@@ -823,7 +890,7 @@ module.exports = function (app){
 					
 					Produtos.create(dados).then(
 						function(produtos){
-							res.status(201).json(contato)
+							res.status(201).json(produtos)
 							
 						},
 						function(produtos){

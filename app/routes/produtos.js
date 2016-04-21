@@ -54,11 +54,14 @@ module.exports = function (app){
 	app.route('/produtos/produtosRelacionados/:menu/:categoria/:subcategoria')
 		.get(controller.listaProdutosRelacionados)
 		
-	app.route('/produtos/filtros/:filtros/:nome')
+	app.route('/produtos/filtros/:filtros/:nome/:loja')
 		.get(controller.filtros);
 
 	app.route('/produtos/categoriaCount/:categoria/:menu')
 		.get(controller.CountProdutosByCategoria);
+
+	app.route('/produtos/calculaFrete/')
+		.post(controller.calculaFrete);
 
 
 	//Metodos para area de admin, vou mudar pra lá depois

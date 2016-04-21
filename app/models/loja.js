@@ -12,7 +12,11 @@ module.exports = function(){
 		},
 		url: {
 			type: String
+		},
+		cep: {
+			type: String
 		}
+
 	});
 
 	return mongoose.model('Loja',schema);

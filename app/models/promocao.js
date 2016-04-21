@@ -19,26 +19,23 @@ module.exports = function(){
 	  		porcentagem : { type: Number }
 	  },
 
-	  fretePorcentagemAcima : { 
-	  		valor :{ type: Number },
-	  		porcentagem : { type: Number }
-	  },
-
 	  brinde :  { 
 	  	nome : { type: String },
 	  	idProduto : { type: Number } 
 
 	  },
 
-	  dataIni : { type: String },
+	  dataIni : { 
+	  	type: Date,
+		default: Date.now 
+		
+	  },
 
-	  dataFim : { type: String },
+	  dataFim : { type: Date },
 
 	  porcentagem : { type: Number },
 
-	  freteFree : { type: Number },
-
-	  fretePorcentagem : { type: Number }
+	  freteFree : { type: Number }
 
 	});
 

@@ -11,10 +11,13 @@ var model = require('../controllers/promocao');
 module.exports = function (app){
 	var controller = app.controllers.promocao;
 
-	app.route('/promocao/')
-		.post(controller.salvaPromocao);
+	app.route('/promocao/freteFree/')
+		.post(controller.salvaPromocaoFreteFree);
 	app.route('/promocao/buscarPromocao/:nome')
 		.get(controller.listaPromocao);
+	app.route('/promocao/porcentagemValor/')
+		.post(controller.salvaPromocaoPorcentagemValor);
+		
 
 
 

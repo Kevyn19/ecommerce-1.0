@@ -20,6 +20,22 @@ module.exports = function(){
 
 	  loja: { type: String },
 
+	  cep : { type: String },
+
+	  peso: { type: String },
+
+	  formato: { type: Number },
+
+	  comprimento: { type: Number },
+
+	  altura: { type: Number },
+
+	  largura: { type: Number },
+
+	  diametro : { type: Number }, 
+
+	  valorDeclarado : { type: Number }, 
+
 	  tipoproduto : { 
 	  		categoria:{ type: String },
 	  		subcategoria: { type: String }

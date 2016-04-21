@@ -6,7 +6,7 @@ module.exports = function (app){
 	var Produtos = app.models.produtos;
 	var controller = {}
 	
-
+	//Lista a loja 
 	controller.listaLoja = function(req,res){
 		Loja.find({'loja' : req.params.loja}).exec()
 		.then(
@@ -20,7 +20,7 @@ module.exports = function (app){
 	  );
 	};
 
-
+	//Atualiza a loja
 	controller.updateLoja = function(req,res){
 
 		Loja.update({ 'nome' : req.body.loja},{ $set: { 'nome': req.body.lojaNovo }}, {multi: true}).exec()
@@ -45,7 +45,7 @@ module.exports = function (app){
 
 	};
 
-
+	// Criar/Alterar loja
 	controller.salvaLoja = function(req,res){
 		var _id = req.body._id;
 
@@ -54,7 +54,9 @@ module.exports = function (app){
 
 			"porte": req.body.porte,
 
-			"url" : req.body.url
+			"url" : req.body.url,
+
+			"cep" : req.body.cep
 
 		};
 
@@ -69,7 +71,7 @@ module.exports = function (app){
 				}
 			);
 		}else {
-			Loja.create(req.body).then(
+			Loja.create(dados).then(
 				function(loja){
 					res.status(201).json(loja)
 				},

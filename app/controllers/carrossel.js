@@ -5,7 +5,7 @@ module.exports = function (app){
 	var Carrossel = app.models.carrossel;
 	var controller = {}
 	
-
+	//Lista carrossel
 	controller.listaCarrossel = function(req,res){
 		Carrossel.find({'loja' : req.params.loja}).exec()
 		.then(
@@ -19,6 +19,7 @@ module.exports = function (app){
 	  );
 	};
 
+	//Criar/Alterar carrossel
 	controller.salvaCarrossel = function(req,res){
 		var _id = req.body._id;
 

@@ -1,19 +1,20 @@
 var passport = require('passport');
-var GitHubStrategy = require('passport-github').Strategy;
+var FacebookStrategy = require('passport-facebook').Strategy;
 var findOrCreate = require('mongoose-findorcreate');
 var mongoose = require('mongoose');
 
 module.exports = function(){
 	var Usuario = mongoose.model('Usuario');
 
-	passport.use(new GitHubStrategy({
-		clientID: 'a4ae61db3a62523488e9',
-		clientSecret: 'f75d413fcc789a388368f66ae7543e45c2b5bb2a',
-		callbackURL: 'http://localhost:3000/auth/github/callback'
+	passport.use(new FacebookStrategy({
+		clientID: '586088288231878',
+		clientSecret: 'c9abc8eb5a3be49fc8b31d0169425da5',
+		callbackURL: 'http://localhost:3000/auth/facebook/callback'
 	}, function(accessToken, refreshToken, profile, done){
+		console.log(profile);
 		Usuario.findOrCreate(
-			{"login":profile.username},
-			{"nome":profile.username},
+			{"login":profile.displayName},
+			{"nome":profile.displayName},
 			function(erro,usuario){
 				if(erro){
 					console.log(erro);
